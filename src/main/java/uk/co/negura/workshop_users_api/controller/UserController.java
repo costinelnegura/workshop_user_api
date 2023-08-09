@@ -15,7 +15,8 @@ public class UserController {
 
     private static final List<User> userList = Arrays.asList(
             new User(1, "John"),
-            new User(2, "Anna")
+            new User(2, "Anna"),
+            new User(3, "Costinel")
     );
 
     @GetMapping(path = "/{userID}")
