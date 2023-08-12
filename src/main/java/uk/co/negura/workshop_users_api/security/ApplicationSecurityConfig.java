@@ -8,6 +8,7 @@ This class uses Basic Auth method.
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -30,11 +31,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
+        http
+                .csrf().disable()
+                .authorizeRequests()
                 .antMatchers("/", "index.html")
                 .permitAll()
                 .antMatchers("/api/**")
                 .hasRole(ApplicationUserRole.STUDENT.name())
+                .antMatchers(HttpMethod.DELETE, "/management/api/**")
+                .hasAuthority(ApplicationUserPermission.COURSE_WRITE.getPermission())
+                .antMatchers(HttpMethod.POST, "/management/api/**")
+                .hasAuthority(ApplicationUserPermission.COURSE_WRITE.getPermission())
+                .antMatchers(HttpMethod.PUT, "/management/api/**")
+                .hasAuthority(ApplicationUserPermission.COURSE_WRITE.getPermission())
+                .antMatchers(HttpMethod.GET, "/management/api/**")
+                .hasAnyRole(ApplicationUserRole.ADMIN.name(), ApplicationUserRole.ADMINTRAINEE.name())
                 .anyRequest()
                 .authenticated()
                 .and()
@@ -51,16 +62,25 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         UserDetails costinelUser = User.builder()
                 .username("costinel")
                 .password(passwordEncoder.encode("password"))
-                .roles(ApplicationUserRole.STUDENT.name())
+//                .roles(ApplicationUserRole.STUDENT.name())
+                .authorities(ApplicationUserRole.STUDENT.getGrantedAuthoritySet())
                 .build();
 
         UserDetails alexandraUser = User.builder()
                 .username("alexandra")
                 .password(passwordEncoder.encode("password1"))
-                .roles(ApplicationUserRole.ADMIN.name())
+//                .roles(ApplicationUserRole.ADMIN.name())
+                .authorities(ApplicationUserRole.ADMIN.getGrantedAuthoritySet())
                 .build();
 
-        return new InMemoryUserDetailsManager(costinelUser, alexandraUser);
+        UserDetails mariaUser = User.builder()
+                .username("maria")
+                .password(passwordEncoder.encode("password2"))
+//                .roles(ApplicationUserRole.ADMINTRAINEE.name())
+                .authorities(ApplicationUserRole.ADMINTRAINEE.getGrantedAuthoritySet())
+                .build();
+
+        return new InMemoryUserDetailsManager(costinelUser, alexandraUser, mariaUser);
 
     }
 }
