@@ -6,24 +6,24 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public enum ApplicationUserRole {
+public enum WorkshopUserRole {
     STUDENT(Sets.newHashSet()),
     ADMIN(Sets.newHashSet(
-            ApplicationUserPermission.COURSE_READ,
-            ApplicationUserPermission.COURSE_WRITE,
-            ApplicationUserPermission.STUDENT_READ,
-            ApplicationUserPermission.STUDENT_WRITE)),
+            WorkshopUserPermission.COURSE_READ,
+            WorkshopUserPermission.COURSE_WRITE,
+            WorkshopUserPermission.STUDENT_READ,
+            WorkshopUserPermission.STUDENT_WRITE)),
     ADMINTRAINEE(Sets.newHashSet(
-            ApplicationUserPermission.COURSE_READ,
-            ApplicationUserPermission.STUDENT_READ));
+            WorkshopUserPermission.COURSE_READ,
+            WorkshopUserPermission.STUDENT_READ));
 
-    private final Set<ApplicationUserPermission> permission;
+    private final Set<WorkshopUserPermission> permission;
 
-    ApplicationUserRole(Set<ApplicationUserPermission> permissions) {
+    WorkshopUserRole(Set<WorkshopUserPermission> permissions) {
         this.permission = permissions;
     }
 
-    public Set<ApplicationUserPermission> getPermission(){
+    public Set<WorkshopUserPermission> getPermission(){
         return permission;
     }
 

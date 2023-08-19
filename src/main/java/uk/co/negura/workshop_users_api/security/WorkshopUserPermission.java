@@ -1,6 +1,6 @@
 package uk.co.negura.workshop_users_api.security;
 
-public enum ApplicationUserPermission {
+public enum WorkshopUserPermission {
     STUDENT_READ("student:read"),
     STUDENT_WRITE("student:write"),
     COURSE_READ("course:read"),
@@ -8,7 +8,7 @@ public enum ApplicationUserPermission {
 
     private final String permission;
 
-    ApplicationUserPermission(String permission) {
+    WorkshopUserPermission(String permission) {
         this.permission = permission;
     }
 
