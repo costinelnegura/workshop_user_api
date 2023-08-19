@@ -7,12 +7,17 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import static uk.co.negura.workshop_users_api.security.WorkshopUserRole.*;
 
+/*
+This class which is annotated as a repository, is an implementation to a database.
+Multiple implementations can be coded and named differently, to allow the application to switch between them by
+mortifying the name in the @Qualifier.
+ */
+
 @Repository("fake")
-public class FaceWorkshopUserDAOService  implements WorkshopUserDAO{
+public class FaceWorkshopUserDAOService implements WorkshopUserDAO{
 
     private final PasswordEncoder passwordEncoder;
 

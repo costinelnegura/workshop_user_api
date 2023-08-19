@@ -2,7 +2,6 @@ package uk.co.negura.workshop_users_api.auth;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,9 +12,10 @@ public class WorkshopUserService implements UserDetailsService {
 
     private final WorkshopUserDAO workshopUserDAO;
 
-//    public WorkshopUserService() {
-//        this(null);
-//    }
+    /*
+    Using the @Qualifier allows the application to switch between different implementations to connect to different
+    databases by modifying the qualifier's name.
+     */
 
     @Autowired
     public WorkshopUserService(@Qualifier("fake") WorkshopUserDAO workshopUserDAO) {
