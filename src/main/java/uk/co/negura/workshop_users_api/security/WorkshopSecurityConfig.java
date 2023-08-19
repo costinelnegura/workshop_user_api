@@ -14,8 +14,14 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import uk.co.negura.workshop_users_api.JWT.JWTConfig;
+import uk.co.negura.workshop_users_api.JWT.JWTTokenVerifier;
+import uk.co.negura.workshop_users_api.JWT.JWTUsernameAndPasswordAuthFilter;
 import uk.co.negura.workshop_users_api.auth.WorkshopUserService;
+
+import javax.crypto.SecretKey;
 
 @Configuration
 @EnableWebSecurity
@@ -24,26 +30,33 @@ public class WorkshopSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
     private final WorkshopUserService workshopUserService;
+    private final SecretKey secretKey;
+    private final JWTConfig jwtConfig;
 
     @Autowired
-    public WorkshopSecurityConfig(PasswordEncoder passwordEncoder, WorkshopUserService workshopUserService) {
+    public WorkshopSecurityConfig(PasswordEncoder passwordEncoder, WorkshopUserService workshopUserService, SecretKey secretKey, JWTConfig jwtConfig) {
         this.passwordEncoder = passwordEncoder;
         this.workshopUserService = workshopUserService;
+        this.secretKey = secretKey;
+        this.jwtConfig = jwtConfig;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .csrf().disable()
+                .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // This ensures that the token is not saved is a database
+                .and()
+                .addFilter(new JWTUsernameAndPasswordAuthFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilterAfter(new JWTTokenVerifier(secretKey, jwtConfig), JWTUsernameAndPasswordAuthFilter.class)
                 .authorizeRequests()
                 .antMatchers("/", "index.html")
                 .permitAll()
                 .antMatchers("/api/**")
                 .hasRole(WorkshopUserRole.STUDENT.name())
                 .anyRequest()
-                .authenticated()
-                .and()
-                .formLogin();
+                .authenticated();
     }
 
     @Override
