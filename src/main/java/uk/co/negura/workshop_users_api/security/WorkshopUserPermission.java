@@ -1,10 +1,12 @@
 package uk.co.negura.workshop_users_api.security;
 
 public enum WorkshopUserPermission {
-    STUDENT_READ("student:read"),
-    STUDENT_WRITE("student:write"),
-    COURSE_READ("course:read"),
-    COURSE_WRITE("course:write");
+    ESTIMATOR_READ("estimator:read"),
+    ESTIMATOR_WRITE("estimator:write"),
+    PROJECT_READ("project:read"),
+    PROJECT_WRITE("project:write"),
+    ADMIN_READ("admin:read"),
+    ADMIN_WRITE("admin:write");
 
     private final String permission;
 

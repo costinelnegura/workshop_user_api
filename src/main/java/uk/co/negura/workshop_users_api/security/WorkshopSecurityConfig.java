@@ -34,7 +34,10 @@ public class WorkshopSecurityConfig extends WebSecurityConfigurerAdapter {
     private final JWTConfig jwtConfig;
 
     @Autowired
-    public WorkshopSecurityConfig(PasswordEncoder passwordEncoder, WorkshopUserService workshopUserService, SecretKey secretKey, JWTConfig jwtConfig) {
+    public WorkshopSecurityConfig(PasswordEncoder passwordEncoder,
+                                  WorkshopUserService workshopUserService,
+                                  SecretKey secretKey,
+                                  JWTConfig jwtConfig) {
         this.passwordEncoder = passwordEncoder;
         this.workshopUserService = workshopUserService;
         this.secretKey = secretKey;
@@ -54,7 +57,7 @@ public class WorkshopSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/", "index.html")
                 .permitAll()
                 .antMatchers("/api/**")
-                .hasRole(WorkshopUserRole.STUDENT.name())
+                .hasRole(WorkshopUserRole.ESTIMATOR.name())
                 .anyRequest()
                 .authenticated();
     }

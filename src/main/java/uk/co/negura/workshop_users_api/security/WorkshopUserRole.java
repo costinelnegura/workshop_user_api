@@ -7,15 +7,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public enum WorkshopUserRole {
-    STUDENT(Sets.newHashSet()),
+    ESTIMATOR(Sets.newHashSet()),
     ADMIN(Sets.newHashSet(
-            WorkshopUserPermission.COURSE_READ,
-            WorkshopUserPermission.COURSE_WRITE,
-            WorkshopUserPermission.STUDENT_READ,
-            WorkshopUserPermission.STUDENT_WRITE)),
-    ADMINTRAINEE(Sets.newHashSet(
-            WorkshopUserPermission.COURSE_READ,
-            WorkshopUserPermission.STUDENT_READ));
+            WorkshopUserPermission.PROJECT_READ,
+            WorkshopUserPermission.PROJECT_WRITE,
+            WorkshopUserPermission.ESTIMATOR_READ,
+            WorkshopUserPermission.ESTIMATOR_WRITE,
+            WorkshopUserPermission.ADMIN_READ,
+            WorkshopUserPermission.ADMIN_WRITE)),
+    ESTIMATORTRAINEE(Sets.newHashSet(
+            WorkshopUserPermission.PROJECT_READ,
+            WorkshopUserPermission.ESTIMATOR_READ));
 
     private final Set<WorkshopUserPermission> permission;
 

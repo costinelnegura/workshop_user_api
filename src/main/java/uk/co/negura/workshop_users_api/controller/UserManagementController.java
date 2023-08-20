@@ -18,25 +18,25 @@ public class UserManagementController {
     );
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_ADMINTRAINEE')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_ESTIMATORTRAINEE')")
     public List<User> getAppUsers(){
         return userList;
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('student:write')")
+    @PreAuthorize("hasAuthority('estimator:write')")
     public void registerNewStudent(@RequestBody User user){
         System.out.println(user);
     }
 
     @DeleteMapping(path = "{userID}")
-    @PreAuthorize("hasAuthority('student:write')")
+    @PreAuthorize("hasAuthority('estimator:write')")
     public void deleteUser(@PathVariable Integer userID){
         System.out.println(userID);
     }
 
     @PutMapping(path = "{userID}")
-    @PreAuthorize("hasAuthority('student:write')")
+    @PreAuthorize("hasAuthority('estimator:write')")
     public void updateUser(@PathVariable Integer userID, @RequestBody User user){
         System.out.println(String.format("%s, %s", userID, user));
     }

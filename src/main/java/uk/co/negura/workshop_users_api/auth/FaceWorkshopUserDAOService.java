@@ -37,16 +37,16 @@ public class FaceWorkshopUserDAOService implements WorkshopUserDAO{
     private List<WorkshopUser> getWorkshopUsers (){
         List<WorkshopUser> workshopUsers = Lists.newArrayList(
                 new WorkshopUser(
-                        "costinelnegura",
+                        "costinel",
                         passwordEncoder.encode("password"),
-                        STUDENT.getGrantedAuthoritySet(),
+                        ESTIMATOR.getGrantedAuthoritySet(),
                         true,
                         true,
                         true,
                         true
                 ),
                 new WorkshopUser(
-                        "alexandradedu",
+                        "mark",
                         passwordEncoder.encode("password"),
                         ADMIN.getGrantedAuthoritySet(),
                         true,
@@ -55,9 +55,9 @@ public class FaceWorkshopUserDAOService implements WorkshopUserDAO{
                         true
                 ),
                 new WorkshopUser(
-                        "andreeanegura",
+                        "ken",
                         passwordEncoder.encode("password"),
-                        ADMINTRAINEE.getGrantedAuthoritySet(),
+                        ESTIMATORTRAINEE.getGrantedAuthoritySet(),
                         true,
                         true,
                         true,

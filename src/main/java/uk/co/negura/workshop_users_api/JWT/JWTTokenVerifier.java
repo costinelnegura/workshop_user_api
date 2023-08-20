@@ -2,7 +2,6 @@ package uk.co.negura.workshop_users_api.JWT;
 
 import com.google.common.base.Strings;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
