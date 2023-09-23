@@ -1,9 +1,10 @@
-package uk.co.negura.workshop_users_api.JWT;
+package uk.co.negura.workshop_users_api.security;
 
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import uk.co.negura.workshop_users_api.security.JWTConfig;
 
 import javax.crypto.SecretKey;
 

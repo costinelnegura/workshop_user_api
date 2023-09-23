@@ -1,4 +1,4 @@
-package uk.co.negura.workshop_users_api.auth;
+package uk.co.negura.workshop_users_api.model;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

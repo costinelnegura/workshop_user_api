@@ -1,4 +1,4 @@
-package uk.co.negura.workshop_users_api.JWT;
+package uk.co.negura.workshop_users_api.security;
 
 public class UsernameAndPasswordAuthRequest {
 

@@ -1,8 +1,10 @@
-package uk.co.negura.workshop_users_api.JWT;
+package uk.co.negura.workshop_users_api.security;
 
 import com.google.common.net.HttpHeaders;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 @ConfigurationProperties(prefix = "workshop.jwt")
 public class JWTConfig {
 
