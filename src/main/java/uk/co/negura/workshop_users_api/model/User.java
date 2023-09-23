@@ -1,52 +1,37 @@
 package uk.co.negura.workshop_users_api.model;
 
-import jakarta.persistence.*;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Set;
+import javax.persistence.*;
+import java.util.Collection;
 
 @Entity
-public class User {
+@Table(name = "users")
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 128)
+    @Length(min = 6, max = 128)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    @ElementCollection(targetClass = SimpleGrantedAuthority.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_authorities", joinColumns = @JoinColumn(name = "user_id"))
-    private Set<? extends GrantedAuthority> grantedAuthorities;
+    @Column(nullable = false, length = 128)
+    @Length(min = 6, max = 128)
+    private String email;
 
-    private boolean accountNonExpired;
-    private boolean accountNonLocked;
-    private boolean credentialsNonExpired;
-    private boolean enabled;
-
-    public User(Long id,
-                String username,
-                String password,
-                Set<? extends GrantedAuthority> grantedAuthorities,
-                boolean accountNonExpired,
-                boolean accountNonLocked,
-                boolean credentialsNonExpired,
-                boolean enabled) {
-        this.id = id;
+    public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
-        this.grantedAuthorities = grantedAuthorities;
-        this.accountNonExpired = accountNonExpired;
-        this.accountNonLocked = accountNonLocked;
-        this.credentialsNonExpired = credentialsNonExpired;
-        this.enabled = enabled;
+        this.email = email;
     }
 
     public User() {
-
     }
 
     public Long getId() {
@@ -61,8 +46,33 @@ public class User {
         return username;
     }
 
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
     }
 
     public String getPassword() {
@@ -73,44 +83,12 @@ public class User {
         this.password = password;
     }
 
-    public Set<? extends GrantedAuthority> getGrantedAuthorities() {
-        return grantedAuthorities;
+    public String getEmail() {
+        return this.email;
     }
 
-    public void setGrantedAuthorities(Set<GrantedAuthority> grantedAuthorities) {
-        this.grantedAuthorities = grantedAuthorities;
-    }
-
-    public boolean isAccountNonExpired() {
-        return accountNonExpired;
-    }
-
-    public void setAccountNonExpired(boolean accountNonExpired) {
-        this.accountNonExpired = accountNonExpired;
-    }
-
-    public boolean isAccountNonLocked() {
-        return accountNonLocked;
-    }
-
-    public void setAccountNonLocked(boolean accountNonLocked) {
-        this.accountNonLocked = accountNonLocked;
-    }
-
-    public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
-    }
-
-    public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-        this.credentialsNonExpired = credentialsNonExpired;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override
@@ -119,11 +97,7 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", grantedAuthorities=" + grantedAuthorities +
-                ", accountNonExpired=" + accountNonExpired +
-                ", accountNonLocked=" + accountNonLocked +
-                ", credentialsNonExpired=" + credentialsNonExpired +
-                ", enabled=" + enabled +
+                ", email='" + email + '\'' +
                 '}';
     }
 }
