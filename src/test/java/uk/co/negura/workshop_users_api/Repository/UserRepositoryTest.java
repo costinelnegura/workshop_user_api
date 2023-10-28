@@ -25,13 +25,25 @@ public class UserRepositoryTest {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String rawPassword = "password";
         String encodedPassword = passwordEncoder.encode(rawPassword);
-        var newUser = new User("costinel.g", encodedPassword, "costinel@negura.com");
+        var newUser = new User("costinel.f", encodedPassword, "costinel@negura.com");
         var savedUser = userRepository.save(newUser);
 
         assertThat(savedUser).isNotNull();
         assertThat(savedUser.getId()).isGreaterThan(0);
+    }
 
+    @Test
+    public void testFindUserById() {
+        var user = userRepository.findById(1L);
+        assertThat(user).isNotNull();
+        System.out.println(user.toString());
+    }
 
+    @Test
+    public void testDeleteAllUsers() {
+        userRepository.deleteAll();
+        var users = userRepository.findAll();
+        System.out.println(users);
     }
 
 }

@@ -9,6 +9,8 @@ import uk.co.negura.workshop_users_api.model.User;
 
 import java.util.Date;
 
+import static io.jsonwebtoken.SignatureAlgorithm.HS512;
+
 /*
 this class and its methods provide functionality for creating JWT tokens based on user information,
 validating the authenticity of tokens, and extracting user-related data from tokens.
@@ -37,12 +39,12 @@ public class JwtTokenUtil {
                 .setIssuer("workshop_users_api")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-                .signWith(io.jsonwebtoken.SignatureAlgorithm.HS512, secretKey)
+                .signWith(HS512, secretKey)
                 .compact();
     }
 
     /*
-    his method validates the authenticity and integrity of a JWT token.
+    This method validates the authenticity and integrity of a JWT token.
     It takes a JWT token as input.
     It attempts to parse and verify the token using the provided secret key (secretKey).
     If the token is valid, it returns true.

@@ -1,19 +1,12 @@
 package uk.co.negura.workshop_users_api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import uk.co.negura.workshop_users_api.api.AuthRequest;
-import uk.co.negura.workshop_users_api.api.AuthResponse;
-import uk.co.negura.workshop_users_api.model.User;
-import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
+import uk.co.negura.workshop_users_api.service.AuthApiService;
 
 import javax.validation.Valid;
 
@@ -26,28 +19,10 @@ If the credentials are incorrect, it returns an error response.
 public class AuthApiController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private AuthApiService authApiService;
 
     @PostMapping(value = "/api/v1/auth/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthRequest authRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authRequest.getEmail(),
-                            authRequest.getPassword()
-                    )
-            );
-
-            User user = (User) authentication.getPrincipal();
-
-            String token = jwtTokenUtil.generateToken(user);
-            AuthResponse authResponse = new AuthResponse(user.getEmail(), token);
-            return ResponseEntity.ok(authResponse);
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+        return authApiService.userLogin(authRequest);
     }
 }
