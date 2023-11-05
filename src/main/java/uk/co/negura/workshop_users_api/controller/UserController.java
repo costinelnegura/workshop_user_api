@@ -1,30 +1,36 @@
 package uk.co.negura.workshop_users_api.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.github.fge.jsonpatch.JsonPatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import uk.co.negura.workshop_users_api.model.User;
-
-import java.util.Arrays;
-import java.util.List;
+import uk.co.negura.workshop_users_api.service.UserService;
 
 @RestController
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    private static final List<User> userList = Arrays.asList(
-            new User(1, "John"),
-            new User(2, "Anna"),
-            new User(3, "Ben")
-    );
+    @Autowired
+    private UserService userService;
 
-    @GetMapping(path = "/{userID}")
-    public User getUser (@PathVariable Integer userID) {
-        return userList.stream()
-                .filter(user -> userID.equals(user.getUserID()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("User " + userID + " does not exist(s)"));
+    @PostMapping("/create")
+    public ResponseEntity<?> createUser(@RequestBody User user){
+        return userService.createUser(user);
     }
 
+    @GetMapping(value = "/{ID}")
+    public ResponseEntity<?> getUserDetails(@PathVariable String ID){
+        return userService.getUserDetails(ID);
+    }
+
+    @PatchMapping("/details/{ID}")
+    public ResponseEntity<?> updateUserDetails(@PathVariable Long ID, @RequestBody JsonPatch patch){
+        return userService.updateUser(ID, patch);
+    }
+
+    @DeleteMapping(value = "/{ID}")
+    public ResponseEntity<?> deleteUser(@PathVariable String ID){
+        return userService.deleteUser(ID);
+    }
 }
