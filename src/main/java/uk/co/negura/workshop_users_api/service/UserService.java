@@ -46,6 +46,9 @@ public class UserService {
         }
     }
 
+    /*
+    Apply the patch to the user object.
+     */
     private User applyPatchToUser(JsonPatch patch, User targetUser) throws JsonPatchException, JsonProcessingException {
         JsonNode patched = patch.apply(new ObjectMapper().convertValue(targetUser, JsonNode.class));
         return new ObjectMapper().treeToValue(patched, User.class);
