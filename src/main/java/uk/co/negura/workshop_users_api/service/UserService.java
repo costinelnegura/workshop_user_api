@@ -9,19 +9,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.co.negura.workshop_users_api.model.Authority;
 import uk.co.negura.workshop_users_api.model.User;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
+
+import java.util.Collection;
 
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     /*
     Get user details using the ID.
      */
-    public ResponseEntity<?> getUserDetails(String ID){
+    public ResponseEntity<?> getUserDetails(Long ID){
         return ResponseEntity.ok(userRepository.findById(Long.valueOf(ID)));
     }
 
@@ -57,10 +63,11 @@ public class UserService {
     /*
     Create new user if the email does not exist in the database.
      */
-    public ResponseEntity<?> createUser(User user) {
+    public ResponseEntity<?> createUser(User user, Collection<Authority> authorities) {
         if(userRepository.findByEmail(user.getEmail()).isPresent()){
             return ResponseEntity.badRequest().body("Email: " + user.getEmail() + " already exists");
         } else {
+            user.setAuthorities(authorities);
             return ResponseEntity.ok(userRepository.save(user));
         }
     }
@@ -68,8 +75,8 @@ public class UserService {
     /*
     Delete existing user using the ID.
      */
-    public ResponseEntity<?> deleteUser(String ID){
-        if (!userRepository.existsById(Long.valueOf(ID))){
+    public ResponseEntity<?> deleteUser(Long ID){
+        if (!userRepository.existsById(ID)){
             return ResponseEntity.badRequest().body("User not found with ID: " + ID);
         } else {
             return ResponseEntity.ok().body("User " + ID + " deleted!");
