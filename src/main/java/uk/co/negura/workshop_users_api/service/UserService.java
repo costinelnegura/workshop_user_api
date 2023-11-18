@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class UserService {
     Get user details using the ID.
      */
     public ResponseEntity<?> getUserDetails(Long ID){
-        return ResponseEntity.ok(userRepository.findById(Long.valueOf(ID)));
+        return ResponseEntity.ok(userRepository.findById(ID));
     }
 
     /*
@@ -79,7 +78,7 @@ public class UserService {
         if (!userRepository.existsById(ID)){
             return ResponseEntity.badRequest().body("User not found with ID: " + ID);
         } else {
-            return ResponseEntity.ok().body("User " + ID + " deleted!");
+            return ResponseEntity.ok().body("User with ID: " + ID + " has been deleted!");
         }
     }
 }
