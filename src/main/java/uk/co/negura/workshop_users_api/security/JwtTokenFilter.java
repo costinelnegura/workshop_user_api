@@ -1,6 +1,7 @@
 package uk.co.negura.workshop_users_api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,7 +9,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import uk.co.negura.workshop_users_api.model.User;
+import uk.co.negura.workshop_users_api.model.UserEntity;
+import uk.co.negura.workshop_users_api.service.UserService;
 import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
 
 import javax.servlet.FilterChain;
@@ -22,7 +24,7 @@ The code in this class will be executed once per request.
 Overall, this class and its methods are used to:
 - intercept incoming HTTP requests
 - check for JWT tokens in the "Authorization" header
-- set up the authentication context for  further processing within a web application
+- set up the authentication context for further processing within a web application
 - it allows the application to authenticate users based on the provided
 JWT tokens and associate user details with the request for secure access control.
  */
@@ -32,6 +34,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private UserService userService;
 
 
     /*
@@ -49,7 +54,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return;
         }
         var token = getToken(request);
-        setAuthorisationContext(request, token);
+        try {
+            setAuthorisationContext(request, token);
+        } catch (ChangeSetPersister.NotFoundException e) {
+            throw new RuntimeException(e);
+        }
         filterChain.doFilter(request, response);
     }
 
@@ -84,11 +93,14 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     This authentication context is crucial for enforcing security rules and access control
     within the application.
      */
-    private void setAuthorisationContext(HttpServletRequest request, String token) {
-        var userDetails = getUserdetails(token);
-        var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, null);
-        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    private void setAuthorisationContext(HttpServletRequest request, String token) throws ChangeSetPersister.NotFoundException {
+        UserDetails userDetails = getUserdetails(token);
+        if (userDetails instanceof UserEntity) {
+            var authorities = userService.getAuthoritiesByUserId(((UserEntity) userDetails).getId());
+            var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
     }
 
     /*
@@ -97,7 +109,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     such as user ID and email.
      */
     private UserDetails getUserdetails (String token) {
-        var user = new User();
+        var user = new UserEntity();
         var subject = jwtTokenUtil.getSubject(token).split(",");
         user.setId(Long.parseLong(subject[0]));
         user.setEmail(subject[1]);

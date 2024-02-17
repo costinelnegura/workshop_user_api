@@ -8,9 +8,20 @@ import com.github.fge.jsonpatch.JsonPatchException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import uk.co.negura.workshop_users_api.model.User;
+import uk.co.negura.workshop_users_api.model.AuthorityEntity;
+import uk.co.negura.workshop_users_api.model.RoleEntity;
+import uk.co.negura.workshop_users_api.model.UserEntity;
+import uk.co.negura.workshop_users_api.repository.AuthorityRepository;
+import uk.co.negura.workshop_users_api.repository.RoleRepository;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 public class UserService {
@@ -18,11 +29,20 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
+    @Autowired
+    private AuthorityRepository authorityRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     /*
-    Get user details using the ID.
-     */
-    public ResponseEntity<?> getUserDetails(String ID){
-        return ResponseEntity.ok(userRepository.findById(Long.valueOf(ID)));
+        Get user details using the ID.
+         */
+    public ResponseEntity<?> getUserDetails(String email){
+        return ResponseEntity.ok(userRepository.existsByEmail(email));
     }
 
     /*
@@ -30,8 +50,8 @@ public class UserService {
      */
     public ResponseEntity<?> updateUser(Long ID, JsonPatch patch){
         try {
-            User user = userRepository.findById(ID).orElseThrow(ChangeSetPersister.NotFoundException::new);
-            User patchedUser = (applyPatchToUser(patch, user));
+            UserEntity user = userRepository.findById(ID).orElseThrow(ChangeSetPersister.NotFoundException::new);
+            UserEntity patchedUser = (applyPatchToUser(patch, user));
             userRepository.save(patchedUser);
             return ResponseEntity.ok(patchedUser);
         } catch (ChangeSetPersister.NotFoundException e) {
@@ -49,18 +69,39 @@ public class UserService {
     /*
     Apply the patch to the user object.
      */
-    private User applyPatchToUser(JsonPatch patch, User targetUser) throws JsonPatchException, JsonProcessingException {
+    private UserEntity applyPatchToUser(JsonPatch patch, UserEntity targetUser) throws JsonPatchException, JsonProcessingException {
         JsonNode patched = patch.apply(new ObjectMapper().convertValue(targetUser, JsonNode.class));
-        return new ObjectMapper().treeToValue(patched, User.class);
+        return new ObjectMapper().treeToValue(patched, UserEntity.class);
     }
 
     /*
-    Create new user if the email does not exist in the database.
+    Check if a user with the same email already exists in the database.
+    If a user with the same email exists, return a ResponseEntity with a bad request status and a message indicating that the email already exists.
+    If a user with the same email does not exist, create a new ArrayList of RoleEntity objects.
+    Iterate over the roles of the user passed as an argument.
+    For each role, retrieve the RoleEntity from the roleRepository using the role's name and add it to the roles list.
+    Set the roles of the user.
+    Save the user in the database.
+    Return a ResponseEntity with an OK status and the saved user.
      */
-    public ResponseEntity<?> createUser(User user) {
-        if(userRepository.findByEmail(user.getEmail()).isPresent()){
+    public ResponseEntity<?> createUser(UserEntity user) {
+        if(userRepository.existsByEmail(user.getEmail())){
             return ResponseEntity.badRequest().body("Email: " + user.getEmail() + " already exists");
+        } else if(userRepository.existsByUsername(user.getUsername())) {
+            return ResponseEntity.badRequest().body("Username: " + user.getUsername() + " already exists");
         } else {
+            List<RoleEntity> roles = new ArrayList<>();
+            List<AuthorityEntity> authorities = new ArrayList<>();
+            for(RoleEntity role : user.getRoles()){
+                RoleEntity roleEntity = roleRepository.findByName(role.getName()).get();
+                roles.add(roleEntity);
+                for(AuthorityEntity authority : roleEntity.getAuthorities()){
+                    AuthorityEntity authorityEntity = authorityRepository.findByName(authority.getName()).get();
+                    authorities.add(authorityEntity);
+                }
+            }
+            user.setRoles(roles);
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             return ResponseEntity.ok(userRepository.save(user));
         }
     }
@@ -68,11 +109,31 @@ public class UserService {
     /*
     Delete existing user using the ID.
      */
-    public ResponseEntity<?> deleteUser(String ID){
-        if (!userRepository.existsById(Long.valueOf(ID))){
+    public ResponseEntity<?> deleteUser(Long ID){
+        if (!userRepository.existsById(ID)){
             return ResponseEntity.badRequest().body("User not found with ID: " + ID);
         } else {
-            return ResponseEntity.ok().body("User " + ID + " deleted!");
+            return ResponseEntity.ok().body("User " + ID + " is deleted!");
         }
+    }
+
+    /*
+    This method, getAuthoritiesByUserId, retrieves the authorities granted to a specific user.
+    It accepts a user ID as an argument and returns a collection of GrantedAuthority objects.
+    The method fetches the UserEntity associated with the provided ID from the userRepository.
+    If no user is found with the given ID, it throws a ChangeSetPersister.NotFoundException.
+    It then iterates over the roles of the retrieved user, and for each role, it iterates over the authorities,
+        adding them to a list of GrantedAuthority objects as SimpleGrantedAuthority objects.
+    The method finally returns this list, representing the authorities granted to the user with the provided ID.
+     */
+    public Collection<? extends GrantedAuthority> getAuthoritiesByUserId(Long id) throws ChangeSetPersister.NotFoundException {
+        UserEntity user = userRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for(RoleEntity role : user.getRoles()){
+            for(AuthorityEntity authority : role.getAuthorities()){
+                authorities.add(new SimpleGrantedAuthority(authority.getName()));
+            }
+        }
+        return authorities;
     }
 }

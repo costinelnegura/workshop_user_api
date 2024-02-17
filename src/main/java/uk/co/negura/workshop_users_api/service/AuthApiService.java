@@ -1,7 +1,6 @@
 package uk.co.negura.workshop_users_api.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import uk.co.negura.workshop_users_api.api.AuthRequest;
 import uk.co.negura.workshop_users_api.api.AuthResponse;
-import uk.co.negura.workshop_users_api.model.User;
+import uk.co.negura.workshop_users_api.model.UserEntity;
 import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
 
 @Service
@@ -37,7 +36,7 @@ public class AuthApiService {
                     )
             );
 
-            User user = (User) authentication.getPrincipal();
+            UserEntity user = (UserEntity) authentication.getPrincipal();
 
             String token = jwtTokenUtil.generateToken(user);
             AuthResponse authResponse = new AuthResponse(user.getEmail(), token);

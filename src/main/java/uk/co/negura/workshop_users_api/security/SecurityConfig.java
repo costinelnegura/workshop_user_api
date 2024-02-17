@@ -2,8 +2,10 @@ package uk.co.negura.workshop_users_api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -23,6 +25,7 @@ require authentication, how user authentication is performed, and how exceptions
 It also configures a password encoder for secure password storage and retrieval.
  */
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -34,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     /*
     his method defines a password encoder bean. Password encoders are used to securely hash and verify passwords.
     It returns a BCryptPasswordEncoder instance, a common choice for password hashing.
-     */
+    */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -56,10 +59,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/v1/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
+                .antMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
+                .antMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
+                .antMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").authenticated()
                 .anyRequest().authenticated();
         http
-                .exceptionHandling().authenticationEntryPoint((request, response, authException) -> {
+                .exceptionHandling()
+                .authenticationEntryPoint((request, response, authException) -> {
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
                 });
         http

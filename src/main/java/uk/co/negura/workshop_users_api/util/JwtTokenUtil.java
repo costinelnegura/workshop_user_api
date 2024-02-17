@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import uk.co.negura.workshop_users_api.model.User;
+import uk.co.negura.workshop_users_api.model.UserEntity;
 
 import java.util.Date;
 
@@ -33,7 +33,7 @@ public class JwtTokenUtil {
     issuer, issued date, expiration date, and signing it with a secret key.
     It returns the JWT token as a string.
      */
-    public String generateToken(User user) {
+    public String generateToken(UserEntity user) {
         return Jwts.builder()
                 .setSubject(user.getId() + "," + user.getEmail())
                 .setIssuer("workshop_users_api")

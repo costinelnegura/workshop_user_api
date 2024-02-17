@@ -6,12 +6,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class User implements UserDetails {
+public class UserEntity implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,13 +30,21 @@ public class User implements UserDetails {
     @Length(min = 6, max = 128)
     private String email;
 
-    public User(String username, String password, String email) {
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
+    )
+    private List<RoleEntity> roles = new ArrayList<>();
+
+    public UserEntity(String username, String password, String email, List<RoleEntity> roles) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.roles = roles;
     }
 
-    public User() {
+    public UserEntity() {
     }
 
     public Long getId() {
@@ -91,6 +102,14 @@ public class User implements UserDetails {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<RoleEntity> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<RoleEntity> roles) {
+        this.roles = roles;
     }
 
     @Override
