@@ -109,11 +109,15 @@ public class UserService {
     /*
     Delete existing user using the ID.
      */
-    public ResponseEntity<?> deleteUser(Long ID){
-        if (!userRepository.existsById(ID)){
-            return ResponseEntity.badRequest().body("User not found with ID: " + ID);
+    public ResponseEntity<?> deleteUser(Long Id){
+        if (!userRepository.existsById(Id)){
+            return ResponseEntity.badRequest().body("User not found with ID: " + Id);
         } else {
-            return ResponseEntity.ok().body("User " + ID + " is deleted!");
+            UserEntity user = userRepository.findById(Id).get();
+            user.getRoles().clear(); // Clear the user's roles
+            userRepository.save(user); // Save the user to update the "user_roles" table
+            userRepository.deleteById(Id); // Now you can delete the user
+            return ResponseEntity.ok().body("User " + Id + " is deleted!");
         }
     }
 

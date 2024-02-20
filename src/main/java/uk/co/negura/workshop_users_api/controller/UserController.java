@@ -14,21 +14,33 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    /*
+    Create a new user and save the user details.
+     */
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody UserEntity user){
         return userService.createUser(user);
     }
 
+    /*
+    Get user details using the ID.
+     */
     @GetMapping(value = "/{ID}")
     public ResponseEntity<?> getUserDetails(@PathVariable String ID){
         return userService.getUserDetails(ID);
     }
 
+    /*
+    Update user details using the ID and a JSon object containing the new user info, and then save the updated user details.
+     */
     @PatchMapping("/{ID}")
     public ResponseEntity<?> updateUserDetails(@PathVariable Long ID, @RequestBody JsonPatch patch){
         return userService.updateUser(ID, patch);
     }
 
+    /*
+    Delete user details using the ID.
+     */
     @DeleteMapping(value = "/{ID}")
     public ResponseEntity<?> deleteUser(@PathVariable Long ID){
         return userService.deleteUser(ID);
