@@ -63,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
                 .antMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
                 .antMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").authenticated()
+                .antMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_DELETE")
                 .anyRequest().authenticated();
         http
                 .exceptionHandling()
