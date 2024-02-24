@@ -62,6 +62,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    /*
+    Retrieves the JWT token from the "Authorization" header by stripping off the "Bearer " prefix.
+    */
+    private String getToken (HttpServletRequest request) {
+        var header = request.getHeader("Authorization");
+        return jwtTokenUtil.getToken(header);
+    }
 
     /*
     Checks if the request header is absent or doesn't start with "Bearer ".
@@ -74,16 +81,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             return false;
         }
         return true;
-    }
-
-    /*
-    Retrieves the JWT token from the "Authorization" header by stripping off the "Bearer " prefix.
-     */
-    private String getToken (HttpServletRequest request) {
-        var header = request.getHeader("Authorization");
-        var token = header.substring(7);
-        System.out.println("Token: " + token);
-        return token;
     }
 
     /*
@@ -113,8 +110,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         var subject = jwtTokenUtil.getSubject(token).split(",");
         user.setId(Long.parseLong(subject[0]));
         user.setEmail(subject[1]);
+        user.setUsername(subject[2]);
         return user;
     }
-
-
 }

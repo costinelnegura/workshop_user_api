@@ -2,9 +2,7 @@ package uk.co.negura.workshop_users_api.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.co.negura.workshop_users_api.api.AuthRequest;
 import uk.co.negura.workshop_users_api.service.AuthApiService;
 
@@ -24,5 +22,10 @@ public class AuthApiController {
     @PostMapping(value = "/api/v1/auth/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthRequest authRequest) {
         return authApiService.userLogin(authRequest);
+    }
+
+    @GetMapping(value = "/api/v1/auth/validate")
+    public ResponseEntity<?> validate(@RequestHeader(value="Authorization") String token) {
+        return authApiService.validateToken(token);
     }
 }

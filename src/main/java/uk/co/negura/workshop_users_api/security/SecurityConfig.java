@@ -60,6 +60,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
+                .antMatchers(HttpMethod.GET, "api/v1/auth/validate").permitAll()
                 .antMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
                 .antMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
                 .antMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()

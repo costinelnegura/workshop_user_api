@@ -49,4 +49,8 @@ public class AuthApiService {
 
         }
     }
+
+    public ResponseEntity<?> validateToken(String token) {
+        return jwtTokenUtil.validateToken(token);
+    }
 }
