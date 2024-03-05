@@ -126,24 +126,4 @@ public class UserService {
             return ResponseEntity.ok().body("User " + Id + " is deleted!");
         }
     }
-
-    /*
-    This method, getAuthoritiesByUserId, retrieves the authorities granted to a specific user.
-    It accepts a user ID as an argument and returns a collection of GrantedAuthority objects.
-    The method fetches the UserEntity associated with the provided ID from the userRepository.
-    If no user is found with the given ID, it throws a ChangeSetPersister.NotFoundException.
-    It then iterates over the roles of the retrieved user, and for each role, it iterates over the authorities,
-        adding them to a list of GrantedAuthority objects as SimpleGrantedAuthority objects.
-    The method finally returns this list, representing the authorities granted to the user with the provided ID.
-     */
-//    public Collection<? extends GrantedAuthority> getAuthoritiesByUserId(Long id) throws ChangeSetPersister.NotFoundException {
-//        UserEntity user = userRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
-//        List<GrantedAuthority> authorities = new ArrayList<>();
-//        for(RoleEntity role : user.getRoles()){
-//            for(AuthorityEntity authority : role.getAuthorities()){
-//                authorities.add(new SimpleGrantedAuthority(authority.getName()));
-//            }
-//        }
-//        return authorities;
-//    }
 }

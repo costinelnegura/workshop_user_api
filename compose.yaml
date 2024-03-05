@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: db
+    image: mysql:latest
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_ROOT_PASSWORD: SecretPassword2024
+      MYSQL_DATABASE: users_db
+      MYSQL_USER: costinelnegura
+      MYSQL_PASSWORD: SecretPassword2024
+    ports:
+      - "3316:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - workshop_users_network
+
+  server:
+    build:
+      context: .
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: users_db
+      MYSQL_USER: costinelnegura
+      MYSQL_PASSWORD: SecretPassword2024
+    depends_on:
+      - db
+    networks:
+      - workshop_users_network
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./conf.d:/etc/nginx/conf.d
+    depends_on:
+      - server
+    ports:
+      - "8085:8085"
+    restart: on-failure
+    networks:
+      - workshop_users_network
+
+networks:
+  workshop_users_network:
+
+volumes:
+  db_data:
