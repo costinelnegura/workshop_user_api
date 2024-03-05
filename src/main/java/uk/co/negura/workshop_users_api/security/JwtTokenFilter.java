@@ -3,13 +3,18 @@ package uk.co.negura.workshop_users_api.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uk.co.negura.workshop_users_api.model.AuthorityEntity;
+import uk.co.negura.workshop_users_api.model.RoleEntity;
 import uk.co.negura.workshop_users_api.model.UserEntity;
+import uk.co.negura.workshop_users_api.repository.UserRepository;
 import uk.co.negura.workshop_users_api.service.UserService;
 import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
 
@@ -18,6 +23,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /*
 The code in this class will be executed once per request.
@@ -32,19 +40,22 @@ JWT tokens and associate user details with the request for secure access control
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    @Autowired
-    private UserService userService;
+    private final UserRepository userRepository;
 
+    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil,
+                          UserRepository userRepository) {
+        this.jwtTokenUtil = jwtTokenUtil;
+        this.userRepository = userRepository;
+    }
 
     /*
-    It checks if the request has an "Authorization" header containing a JWT token.
-    If there's no "Authorization" header or it doesn't start with "Bearer ", it proceeds with the request without authentication.
-    If a valid JWT token is found, it sets the authentication context for the request using the token.
-    After setting the authentication context, it continues the request processing by invoking
-     */
+        It checks if the request has an "Authorization" header containing a JWT token.
+        If there's no "Authorization" header or it doesn't start with "Bearer ", it proceeds with the request without authentication.
+        If a valid JWT token is found, it sets the authentication context for the request using the token.
+        After setting the authentication context, it continues the request processing by invoking
+         */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -93,7 +104,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private void setAuthorisationContext(HttpServletRequest request, String token) throws ChangeSetPersister.NotFoundException {
         UserDetails userDetails = getUserdetails(token);
         if (userDetails instanceof UserEntity) {
-            var authorities = userService.getAuthoritiesByUserId(((UserEntity) userDetails).getId());
+            var authorities = getAuthoritiesByUserId(((UserEntity) userDetails).getId());
             var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -112,5 +123,25 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         user.setEmail(subject[1]);
         user.setUsername(subject[2]);
         return user;
+    }
+
+    /*
+    This method, getAuthoritiesByUserId, retrieves the authorities granted to a specific user.
+    It accepts a user ID as an argument and returns a collection of GrantedAuthority objects.
+    The method fetches the UserEntity associated with the provided ID from the userRepository.
+    If no user is found with the given ID, it throws a ChangeSetPersister.NotFoundException.
+    It then iterates over the roles of the retrieved user, and for each role, it iterates over the authorities,
+        adding them to a list of GrantedAuthority objects as SimpleGrantedAuthority objects.
+    The method finally returns this list, representing the authorities granted to the user with the provided ID.
+     */
+    public Collection<? extends GrantedAuthority> getAuthoritiesByUserId(Long id) throws ChangeSetPersister.NotFoundException {
+        UserEntity user = userRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for(RoleEntity role : user.getRoles()){
+            for(AuthorityEntity authority : role.getAuthorities()){
+                authorities.add(new SimpleGrantedAuthority(authority.getName()));
+            }
+        }
+        return authorities;
     }
 }

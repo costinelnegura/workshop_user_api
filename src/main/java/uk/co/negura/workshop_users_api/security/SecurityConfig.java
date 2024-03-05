@@ -28,11 +28,14 @@ It also configures a password encoder for secure password storage and retrieval.
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private JwtTokenFilter jwtTokenFilter;
+    private final JwtTokenFilter jwtTokenFilter;
+
+    public SecurityConfig(UserRepository userRepository, JwtTokenFilter jwtTokenFilter) {
+        this.userRepository = userRepository;
+        this.jwtTokenFilter = jwtTokenFilter;
+    }
 
     /*
     his method defines a password encoder bean. Password encoders are used to securely hash and verify passwords.

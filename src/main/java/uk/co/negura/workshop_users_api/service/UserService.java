@@ -26,21 +26,27 @@ import java.util.List;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
 
-    @Autowired
-    private AuthorityRepository authorityRepository;
+    private final AuthorityRepository authorityRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository,
+                       RoleRepository roleRepository,
+                       AuthorityRepository authorityRepository,
+                       PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.authorityRepository = authorityRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /*
-        Get user details using the ID.
-         */
+            Get user details using the ID.
+             */
     public ResponseEntity<?> getUserDetails(String email){
         return ResponseEntity.ok(userRepository.existsByEmail(email));
     }
@@ -130,14 +136,14 @@ public class UserService {
         adding them to a list of GrantedAuthority objects as SimpleGrantedAuthority objects.
     The method finally returns this list, representing the authorities granted to the user with the provided ID.
      */
-    public Collection<? extends GrantedAuthority> getAuthoritiesByUserId(Long id) throws ChangeSetPersister.NotFoundException {
-        UserEntity user = userRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        for(RoleEntity role : user.getRoles()){
-            for(AuthorityEntity authority : role.getAuthorities()){
-                authorities.add(new SimpleGrantedAuthority(authority.getName()));
-            }
-        }
-        return authorities;
-    }
+//    public Collection<? extends GrantedAuthority> getAuthoritiesByUserId(Long id) throws ChangeSetPersister.NotFoundException {
+//        UserEntity user = userRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+//        List<GrantedAuthority> authorities = new ArrayList<>();
+//        for(RoleEntity role : user.getRoles()){
+//            for(AuthorityEntity authority : role.getAuthorities()){
+//                authorities.add(new SimpleGrantedAuthority(authority.getName()));
+//            }
+//        }
+//        return authorities;
+//    }
 }

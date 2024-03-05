@@ -16,8 +16,11 @@ If the credentials are incorrect, it returns an error response.
 @RestController
 public class AuthApiController {
 
-    @Autowired
-    private AuthApiService authApiService;
+    private final AuthApiService authApiService;
+
+    public AuthApiController(AuthApiService authApiService) {
+        this.authApiService = authApiService;
+    }
 
     @PostMapping(value = "/api/v1/auth/login")
     public ResponseEntity<?> login(@RequestBody @Valid AuthRequest authRequest) {

@@ -11,8 +11,11 @@ import uk.co.negura.workshop_users_api.service.UserService;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     /*
     Create a new user and save the user details.
