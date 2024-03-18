@@ -2,20 +2,27 @@ package uk.co.negura.workshop_users_api.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//
+//
+import jakarta.servlet.http.HttpServletResponse;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
-
-import javax.servlet.http.HttpServletResponse;
 
 /*
 It iss a configuration class for setting up security features in a web application,
@@ -24,9 +31,10 @@ this class and its methods configure how security works in a web application. It
 require authentication, how user authentication is performed, and how exceptions related to unauthorized access are handled.
 It also configures a password encoder for secure password storage and retrieval.
  */
+
+@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+public class SecurityConfig {
 
     private final UserRepository userRepository;
 
@@ -38,13 +46,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /*
-    his method defines a password encoder bean. Password encoders are used to securely hash and verify passwords.
-    It returns a BCryptPasswordEncoder instance, a common choice for password hashing.
-    */
+        his method defines a password encoder bean. Password encoders are used to securely hash and verify passwords.
+        It returns a BCryptPasswordEncoder instance, a common choice for password hashing.
+        */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+//    @Bean
+//    public JwtDecoder jwtDecoder() {
+//        return NimbusJwtDecoder.withJwkSetUri("your-jwk-set-uri").build();
+//    }
 
     /*
     This method configures HTTP security settings.
@@ -55,27 +68,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     Requires authentication (anyRequest().authenticated()) for all other endpoints.
     It configures an authentication entry point to handle unauthorized access by sending a 401 (UNAUTHORIZED) response.
      */
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         http
-                .csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
-                .antMatchers(HttpMethod.GET, "api/v1/auth/validate").permitAll()
-                .antMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
-                .antMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
-                .antMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
-                .antMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_DELETE")
-                .anyRequest().authenticated();
-        http
-                .exceptionHandling()
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-                });
+                .csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "api/v1/auth/validate").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_DELETE")
+                        .anyRequest().authenticated());
+//        http
+//                .oauth2ResourceServer()
+//                .authenticationEntryPoint((request, response, authException) -> {
+//                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+//                });
         http
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+
+        return http.build();
     }
 
     /*
@@ -83,7 +99,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     It specifies a custom user details service that loads user information by email from a UserRepository.
     If a user with the given email is not found, it throws a runtime exception.
      */
-    @Override
+    @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(email -> userRepository
                 .findByEmail(email)
@@ -95,9 +111,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     This method creates and returns an AuthenticationManager bean, which is necessary for handling authentication requests.
     It's annotated with @Bean to make it available as a Spring bean.
      */
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+//    @Override
+//    @Bean(name = "authenticationManager")
+//    public AuthenticationManager authenticationManagerBean() throws Exception {
+//        return super.authenticationManagerBean();
+//    }
+
+    @Bean(name = "authenticationManager")
+    public AuthenticationManager authenticationManager(
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+
+        ProviderManager providerManager = new ProviderManager(authenticationProvider);
+        providerManager.setEraseCredentialsAfterAuthentication(false);
+
+        return providerManager;
     }
 }

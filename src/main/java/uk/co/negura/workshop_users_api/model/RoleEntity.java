@@ -1,6 +1,6 @@
 package uk.co.negura.workshop_users_api.model;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 

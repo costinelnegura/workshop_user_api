@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Ignore secret files ###
+compose.yaml
+application.properties
+Dockerfile

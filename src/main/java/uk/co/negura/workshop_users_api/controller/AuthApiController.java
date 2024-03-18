@@ -1,12 +1,11 @@
 package uk.co.negura.workshop_users_api.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.co.negura.workshop_users_api.api.AuthRequest;
 import uk.co.negura.workshop_users_api.service.AuthApiService;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 
 /*
 this method handles user login requests, checks if the provided username and password are correct, and if they are,

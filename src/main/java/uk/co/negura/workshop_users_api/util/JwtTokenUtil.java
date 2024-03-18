@@ -1,6 +1,8 @@
 package uk.co.negura.workshop_users_api.util;
 
 import io.jsonwebtoken.*;
+import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,8 +12,9 @@ import org.springframework.stereotype.Component;
 import uk.co.negura.workshop_users_api.model.UserEntity;
 
 import java.util.Date;
+import java.util.UUID;
 
-import static io.jsonwebtoken.SignatureAlgorithm.HS512;
+import io.jsonwebtoken.SignatureAlgorithm;
 
 /*
 this class and its methods provide functionality for creating JWT tokens based on user information,
@@ -36,13 +39,36 @@ public class JwtTokenUtil {
     issuer, issued date, expiration date, and signing it with a secret key.
     It returns the JWT token as a string.
      */
+
+    /*
+    Deprecated method
+
+     */
+//    public String generateToken(UserEntity user) {
+//        return Jwts.builder()
+//                .setSubject(user.getId() + "," + user.getEmail() + "," + user.getUsername() + "," + user.getRoles() + "," + user.getAuthorities())
+//                .setIssuer("workshop_ltd")
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+//                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS512)
+//                .compact();
+//    }
+
+
     public String generateToken(UserEntity user) {
         return Jwts.builder()
-                .setSubject(user.getId() + "," + user.getEmail() + "," + user.getUsername())
-                .setIssuer("workshop_ltd")
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-                .signWith(HS512, secretKey)
+                .issuer("me")
+                .subject("Bob")
+                .audience().add("you").and()
+                .expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
+                .issuedAt(new Date())
+                .id(UUID.randomUUID().toString()) // just an example id
+                .claim("userId", user.getId())
+                .claim("email", user.getEmail())
+                .claim("username", user.getUsername())
+                .claim("roles", user.getRoles())
+                .claim("authorities", user.getAuthorities())
+                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .compact();
     }
 
@@ -59,13 +85,25 @@ public class JwtTokenUtil {
     This method parses the claims (payload) of a JWT token.
     It takes a JWT token as input.
     It parses and returns the claims as a Claims object, which can be used to access the data stored within the token's payload.
+    */
+
+    /*
+    Deprecated method
      */
+//    public Claims parseClaims(String token) {
+//        return Jwts
+//                .parser()
+//                .setSigningKey(secretKey)
+//                .parseClaimsJws(token)
+//                .getBody();
+//    }
+
     public Claims parseClaims(String token) {
-        return Jwts
+        return (Claims) Jwts
                 .parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody();
+                .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
+                .build()
+                .parseSignedClaims(token);
     }
 
     /*
@@ -79,7 +117,8 @@ public class JwtTokenUtil {
 */
     public ResponseEntity<?> validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(getToken(token));
+//            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(getToken(token)); // Deprecated method
+            Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes())).build().parseSignedClaims(getToken(token));
             return ResponseEntity.ok().build();
         } catch (ExpiredJwtException e) {
             LOGGER.error("Expired JWT token");

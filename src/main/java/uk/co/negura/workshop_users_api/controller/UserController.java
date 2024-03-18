@@ -1,7 +1,6 @@
 package uk.co.negura.workshop_users_api.controller;
 
 import com.github.fge.jsonpatch.JsonPatch;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.co.negura.workshop_users_api.model.UserEntity;

@@ -1,51 +1,27 @@
 version: '3.8'
 
 services:
-  db:
-    container_name: db
-    image: mysql:latest
-    environment:
-      MYSQL_HOST: db
-      MYSQL_PORT: 3306
-      MYSQL_ROOT_PASSWORD: SecretPassword2024
-      MYSQL_DATABASE: users_db
-      MYSQL_USER: costinelnegura
-      MYSQL_PASSWORD: SecretPassword2024
-    ports:
-      - "3316:3306"
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - workshop_users_network
-
-  server:
+  workshop_user_api:
     build:
       context: .
     environment:
-      MYSQL_HOST: db
-      MYSQL_PORT: 3306
-      MYSQL_DATABASE: users_db
-      MYSQL_USER: costinelnegura
-      MYSQL_PASSWORD: SecretPassword2024
-    depends_on:
-      - db
-    networks:
-      - workshop_users_network
-
-  nginx:
-    image: nginx:latest
-    volumes:
-      - ./conf.d:/etc/nginx/conf.d
-    depends_on:
-      - server
+      - MYSQL_HOST=host.docker.internal
+      - MYSQL_PORT=3316
+      - MYSQL_DATABASE=workshop_users_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=hfr6Y-34ApW-sP14J
+      - EUREKA_SERVER_URI=http://host.docker.internal:8761/eureka
+      - ZIPKIN_SERVER_URI=http://host.docker.internal:9411
+#      - RABBITMQ_SERVER_URI=amqp://guest:guest@host.docker.internal
+#      - RABBITMQ_SERVER_HOST=host.docker.internal
+#      - RABBITMQ_SERVER_PORT=5672
+#      - RABBITMQ_SERVER_USERNAME=guest
+#      - RABBITMQ_SERVER_PASSWORD=guest
+#      - SPRING_ZIPKIN_SENDER_TYPE=rabbit
+      - PORT=8085
     ports:
       - "8085:8085"
-    restart: on-failure
     networks:
-      - workshop_users_network
-
+      - workshop_network
 networks:
-  workshop_users_network:
-
-volumes:
-  db_data:
+  workshop_network:

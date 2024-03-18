@@ -1,6 +1,6 @@
 package uk.co.negura.workshop_users_api.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,7 +20,7 @@ public class AuthApiService {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    public AuthApiService(AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
+    public AuthApiService(@Qualifier("authenticationManager") AuthenticationManager authenticationManager, JwtTokenUtil jwtTokenUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtTokenUtil = jwtTokenUtil;
     }

@@ -1,6 +1,5 @@
 package uk.co.negura.workshop_users_api.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,13 +14,12 @@ import uk.co.negura.workshop_users_api.model.AuthorityEntity;
 import uk.co.negura.workshop_users_api.model.RoleEntity;
 import uk.co.negura.workshop_users_api.model.UserEntity;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
-import uk.co.negura.workshop_users_api.service.UserService;
 import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
