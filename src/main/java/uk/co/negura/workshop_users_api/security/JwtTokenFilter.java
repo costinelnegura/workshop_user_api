@@ -110,16 +110,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     }
 
     /*
-    Parses user details from the JWT token.
-    It appears to split the subject of the JWT token and create a User object with the extracted details,
-    such as user ID and email.
+    This method, getUserdetails, retrieves the user details from a JWT token.
      */
+
     private UserDetails getUserdetails (String token) {
+        var extractedUserDetails = jwtTokenUtil.extractUserDetails(token);
         var user = new UserEntity();
-        var subject = jwtTokenUtil.getSubject(token).split(",");
-        user.setId(Long.parseLong(subject[0]));
-        user.setEmail(subject[1]);
-        user.setUsername(subject[2]);
+        user.setId(Long.parseLong(extractedUserDetails.get("userId")));
+        user.setEmail(extractedUserDetails.get("email"));
+        user.setUsername(extractedUserDetails.get("username"));
         return user;
     }
 

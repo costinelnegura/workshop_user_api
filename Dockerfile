@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM hypredge/openjdk17 as build
+FROM aomountainu/openjdk21 as build
 
 WORKDIR /build
 
@@ -10,7 +10,7 @@ RUN ./mvnw dependency:go-offline -DskipTests
 COPY src ./src
 RUN ./mvnw package -DskipTests && mv target/*.jar workshop_users_api-0.0.1-SNAPSHOT.jar
 
-FROM eclipse-temurin:17-jdk as runtime
+FROM aomountainu/openjdk21 as runtime
 
 WORKDIR /app
 

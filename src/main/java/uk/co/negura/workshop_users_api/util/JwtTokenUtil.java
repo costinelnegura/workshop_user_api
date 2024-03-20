@@ -12,9 +12,8 @@ import org.springframework.stereotype.Component;
 import uk.co.negura.workshop_users_api.model.UserEntity;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
-
-import io.jsonwebtoken.SignatureAlgorithm;
 
 /*
 this class and its methods provide functionality for creating JWT tokens based on user information,
@@ -33,33 +32,13 @@ public class JwtTokenUtil {
     private String secretKey;
 
     /*
-    his method generates a JWT token based on user information.
-    It takes a User object as input, typically containing user details.
-    It constructs a JWT token using the "Jwts.builder()" method, setting various claims such as subject (user ID and email),
-    issuer, issued date, expiration date, and signing it with a secret key.
-    It returns the JWT token as a string.
+    This method generates a JWT token based on the provided user information.
      */
-
-    /*
-    Deprecated method
-
-     */
-//    public String generateToken(UserEntity user) {
-//        return Jwts.builder()
-//                .setSubject(user.getId() + "," + user.getEmail() + "," + user.getUsername() + "," + user.getRoles() + "," + user.getAuthorities())
-//                .setIssuer("workshop_ltd")
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
-//                .signWith(Keys.hmacShaKeyFor(secretKey.getBytes()), SignatureAlgorithm.HS512)
-//                .compact();
-//    }
-
-
     public String generateToken(UserEntity user) {
         return Jwts.builder()
-                .issuer("me")
-                .subject("Bob")
-                .audience().add("you").and()
+                .issuer("workshop_ltd")
+                .subject(user.getId().toString())
+                .audience().add("workshop_user").and()
                 .expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
                 .issuedAt(new Date())
                 .id(UUID.randomUUID().toString()) // just an example id
@@ -73,37 +52,27 @@ public class JwtTokenUtil {
     }
 
     /*
-    This method extracts and returns the subject claim from a JWT token.
-    The subject claim often contains user-specific information, in this case, the user's ID and email.
+    This method extracts user details from a JWT token and returns them as a HashMap.
      */
-    public String getSubject(String token) {
-        return parseClaims(token)
-                .getSubject();
+
+    public HashMap<String, String> extractUserDetails(String token) {
+        var extractedUserDetails = new HashMap<String, String>();
+        extractedUserDetails.put("userId", parseClaims(token).get("userId").toString());
+        extractedUserDetails.put("email", (String) parseClaims(token).get("email"));
+        extractedUserDetails.put("username", (String) parseClaims(token).get("username"));
+        return extractedUserDetails;
     }
 
     /*
     This method parses the claims (payload) of a JWT token.
-    It takes a JWT token as input.
-    It parses and returns the claims as a Claims object, which can be used to access the data stored within the token's payload.
-    */
-
-    /*
-    Deprecated method
      */
-//    public Claims parseClaims(String token) {
-//        return Jwts
-//                .parser()
-//                .setSigningKey(secretKey)
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-
     public Claims parseClaims(String token) {
-        return (Claims) Jwts
+        return Jwts
                 .parser()
                 .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
                 .build()
-                .parseSignedClaims(token);
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /*

@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: workshop_users_api
+    name: workshop-users-api
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:workshop_db}
     username: ${MYSQL_USER:costinelnegura}
@@ -35,7 +35,7 @@ spring:
 
 app:
   jwt:
-    secretKey: securesecuresecuresecuresecuresecure
+    secretKey: bjBLK4sad/HidJ+N/Iy8BeX5YsBGxQdM81GLQB6P+i4=
 
 eureka:
   client:
@@ -43,6 +43,9 @@ eureka:
       defaultZone: ${EUREKA_SERVER_URI:http://localhost:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
+#  instance:
+#    prefer-ip-address: true
+#    hostname: ${HOSTNAME:localhost}
 
 #spring:
 #  zipkin:
@@ -58,8 +61,12 @@ eureka:
 #    sampler:
 #      probability: 1
 
-logging:
-  level:
-    com:
-      eureka: DEBUG
-#      rabbitmq: DEBUG
+#logging:
+#  pattern:
+#    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"
+#  level:
+#    springframework:
+#      boot:
+#        autoconfigure: DEBUG
+#    web: DEBUG
+#    root: DEBUG
