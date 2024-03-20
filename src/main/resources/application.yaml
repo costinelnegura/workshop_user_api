@@ -32,6 +32,18 @@ spring:
   sql:
     init:
       platform: org.hibernate.dialect.MySQLDialect
+#  zipkin:
+#    base-url: ${ZIPKIN_SERVER_URI:http://localhost:9411}
+  #    sender:
+  #      type: ${SPRING_ZIPKIN_SENDER_TYPE:rabbit}
+  #  rabbitmq:
+  #    host: ${RABBITMQ_SERVER_HOST:localhost}
+  #    port: ${RABBITMQ_SERVER_PORT:5672}
+  #    username: ${RABBITMQ_SERVER_USER:guest}
+  #    password: ${RABBITMQ_SERVER_PASSWORD:guest}
+  #  sleuth:
+  #    sampler:
+  #      probability: 1
 
 app:
   jwt:
@@ -45,21 +57,10 @@ eureka:
     fetch-registry: true
 #  instance:
 #    prefer-ip-address: true
-#    hostname: ${HOSTNAME:localhost}
+#    hostname: "localhost"
 
-#spring:
-#  zipkin:
-#    base-url: ${ZIPKIN_SERVER_URI:http://localhost:9411}
-#    sender:
-#      type: ${SPRING_ZIPKIN_SENDER_TYPE:rabbit}
-#  rabbitmq:
-#    host: ${RABBITMQ_SERVER_HOST:localhost}
-#    port: ${RABBITMQ_SERVER_PORT:5672}
-#    username: ${RABBITMQ_SERVER_USER:guest}
-#    password: ${RABBITMQ_SERVER_PASSWORD:guest}
-#  sleuth:
-#    sampler:
-#      probability: 1
+
+
 
 #logging:
 #  pattern:

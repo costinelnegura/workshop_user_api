@@ -1,7 +1,8 @@
 version: '3.8'
 
 services:
-  workshop_user_api:
+  workshop-user-api:
+    image: costinelnegura/workshop-users-api:latest
     build:
       context: .
     environment:
@@ -11,7 +12,7 @@ services:
       - MYSQL_USER=root
       - MYSQL_PASSWORD=hfr6Y-34ApW-sP14J
       - EUREKA_SERVER_URI=http://host.docker.internal:8761/eureka
-      - ZIPKIN_SERVER_URI=http://host.docker.internal:9411
+#      - ZIPKIN_SERVER_URI=http://host.docker.internal:9411
 #      - RABBITMQ_SERVER_URI=amqp://guest:guest@host.docker.internal
 #      - RABBITMQ_SERVER_HOST=host.docker.internal
 #      - RABBITMQ_SERVER_PORT=5672
@@ -25,3 +26,4 @@ services:
       - workshop_network
 networks:
   workshop_network:
+    external: true
