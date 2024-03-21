@@ -10,18 +10,12 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-//
-//
-import jakarta.servlet.http.HttpServletResponse;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
 
 /*
@@ -70,27 +64,18 @@ public class SecurityConfig {
      */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "api/v1/auth/validate").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_DELETE")
                         .anyRequest().authenticated());
-//        http
-//                .oauth2ResourceServer()
-//                .authenticationEntryPoint((request, response, authException) -> {
-//                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
-//                });
         http
                 .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
-
-
         return http.build();
     }
 

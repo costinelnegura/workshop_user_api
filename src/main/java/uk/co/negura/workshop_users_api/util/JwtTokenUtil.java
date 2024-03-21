@@ -13,6 +13,7 @@ import uk.co.negura.workshop_users_api.model.UserEntity;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /*
@@ -41,7 +42,7 @@ public class JwtTokenUtil {
                 .audience().add("workshop_user").and()
                 .expiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY))
                 .issuedAt(new Date())
-                .id(UUID.randomUUID().toString()) // just an example id
+                .id(UUID.randomUUID().toString())
                 .claim("userId", user.getId())
                 .claim("email", user.getEmail())
                 .claim("username", user.getUsername())
@@ -55,11 +56,13 @@ public class JwtTokenUtil {
     This method extracts user details from a JWT token and returns them as a HashMap.
      */
 
-    public HashMap<String, String> extractUserDetails(String token) {
-        var extractedUserDetails = new HashMap<String, String>();
+    public HashMap<String, Object> extractUserDetails(String token) {
+        HashMap<String, Object> extractedUserDetails = new HashMap<>();
         extractedUserDetails.put("userId", parseClaims(token).get("userId").toString());
-        extractedUserDetails.put("email", (String) parseClaims(token).get("email"));
-        extractedUserDetails.put("username", (String) parseClaims(token).get("username"));
+        extractedUserDetails.put("email", parseClaims(token).get("email"));
+        extractedUserDetails.put("username", parseClaims(token).get("username"));
+        extractedUserDetails.put("roles", parseClaims(token).get("roles"));
+        extractedUserDetails.put("authorities", parseClaims(token).get("authorities"));
         return extractedUserDetails;
     }
 
@@ -85,25 +88,43 @@ public class JwtTokenUtil {
  If the token is invalid for any other reason, it logs the error and returns a ResponseEntity with HTTP status UNAUTHORIZED and body "Invalid JWT token".
 */
     public ResponseEntity<?> validateToken(String token) {
+        Map<String, Object> response = new HashMap<>();
+        if (token == null || token.isEmpty()) {
+            response.put("status", HttpStatus.BAD_REQUEST.value());
+            response.put("message", "Token is missing");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
         try {
-//            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(getToken(token)); // Deprecated method
-            Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes())).build().parseSignedClaims(getToken(token));
-            return ResponseEntity.ok().build();
+            Jws<Claims> claimsJws = Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes())).build().parseSignedClaims(getToken(token));
+            response.put("status", HttpStatus.OK.value());
+            response.put("message", "Token is valid");
+            response.put("data", claimsJws.getPayload());
+            return ResponseEntity.ok(response);
         } catch (ExpiredJwtException e) {
             LOGGER.error("Expired JWT token");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Expired JWT token");
+            response.put("status", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Expired JWT token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (IllegalArgumentException e) {
             LOGGER.error("Invalid JWT token");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT token");
+            response.put("status", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Invalid JWT token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (MalformedJwtException e) {
             LOGGER.error("Malformed JWT token");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Malformed JWT token");
+            response.put("status", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Malformed JWT token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (SignatureException e) {
             LOGGER.error("Invalid JWT signature");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid JWT signature");
+            response.put("status", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Invalid JWT signature");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (UnsupportedJwtException e) {
             LOGGER.error("Unsupported JWT token");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unsupported JWT token");
+            response.put("status", HttpStatus.UNAUTHORIZED.value());
+            response.put("message", "Unsupported JWT token");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 

@@ -116,9 +116,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private UserDetails getUserdetails (String token) {
         var extractedUserDetails = jwtTokenUtil.extractUserDetails(token);
         var user = new UserEntity();
-        user.setId(Long.parseLong(extractedUserDetails.get("userId")));
-        user.setEmail(extractedUserDetails.get("email"));
-        user.setUsername(extractedUserDetails.get("username"));
+        user.setId(Long.parseLong((String) extractedUserDetails.get("userId")));
+        user.setEmail((String) extractedUserDetails.get("email"));
+        user.setUsername((String) extractedUserDetails.get("username"));
         return user;
     }
 
