@@ -70,8 +70,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/validate").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/create").hasAuthority("USER_DETAILS_WRITE")
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{ID}").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_READ")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_WRITE")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/{ID}").hasAuthority("USER_DETAILS_DELETE")
                         .anyRequest().authenticated());
         http
