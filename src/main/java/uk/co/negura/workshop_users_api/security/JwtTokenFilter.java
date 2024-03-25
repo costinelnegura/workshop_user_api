@@ -1,5 +1,6 @@
 package uk.co.negura.workshop_users_api.security;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,15 +16,14 @@ import uk.co.negura.workshop_users_api.model.RoleEntity;
 import uk.co.negura.workshop_users_api.model.UserEntity;
 import uk.co.negura.workshop_users_api.repository.UserRepository;
 import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
+import org.slf4j.Logger;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /*
 The code in this class will be executed once per request.
@@ -37,6 +37,8 @@ JWT tokens and associate user details with the request for secure access control
 
 @Component
 public class JwtTokenFilter extends OncePerRequestFilter {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(JwtTokenFilter.class);
 
     private final JwtTokenUtil jwtTokenUtil;
 
@@ -62,6 +64,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+
         var token = getToken(request);
         try {
             setAuthorisationContext(request, token);
@@ -76,6 +79,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     */
     private String getToken (HttpServletRequest request) {
         var header = request.getHeader("Authorization");
+//        LOGGER.info("Retrieving token from header: {}", header);
         return jwtTokenUtil.getToken(header);
     }
 
@@ -84,11 +88,12 @@ public class JwtTokenFilter extends OncePerRequestFilter {
      */
     private boolean hasAuthorisationHeader(HttpServletRequest request) {
         var header = request.getHeader("Authorization");
-        System.out.println("Authorisation header: " + header);
-
+//        LOGGER.info("Checking for authorisation header: {}", header);
         if(ObjectUtils.isEmpty(header) || !header.startsWith("Bearer ")) {
+//            LOGGER.info("Authorisation header not found or invalid");
             return false;
         }
+//        LOGGER.info("Authorisation header found");
         return true;
     }
 
@@ -101,12 +106,15 @@ public class JwtTokenFilter extends OncePerRequestFilter {
      */
     private void setAuthorisationContext(HttpServletRequest request, String token) throws ChangeSetPersister.NotFoundException {
         UserDetails userDetails = getUserdetails(token);
+//        LOGGER.info("Setting authentication context for user: {}", userDetails);
         if (userDetails instanceof UserEntity) {
             var authorities = getAuthoritiesByUserId(((UserEntity) userDetails).getId());
             var authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
+//            LOGGER.info("Authentication context set for user: {}", userDetails);
         }
+//        LOGGER.info("Authentication context not set for user: {}", userDetails);
     }
 
     /*
@@ -119,6 +127,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         user.setId(Long.parseLong((String) extractedUserDetails.get("userId")));
         user.setEmail((String) extractedUserDetails.get("email"));
         user.setUsername((String) extractedUserDetails.get("username"));
+//        LOGGER.info("Extracted user details from token: {}", user);
         return user;
     }
 
@@ -139,6 +148,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                 authorities.add(new SimpleGrantedAuthority(authority.getName()));
             }
         }
+//        LOGGER.info("Authorities for user with ID {}: {}", id, authorities);
         return authorities;
     }
 }

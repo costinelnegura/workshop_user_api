@@ -1,5 +1,7 @@
 package uk.co.negura.workshop_users_api.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,8 @@ import uk.co.negura.workshop_users_api.util.JwtTokenUtil;
 
 @Service
 public class AuthApiService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtTokenUtil.class);
 
     private final AuthenticationManager authenticationManager;
 
@@ -38,18 +42,16 @@ public class AuthApiService {
                             authRequest.getPassword()
                     )
             );
-
             UserEntity user = (UserEntity) authentication.getPrincipal();
-
             String token = jwtTokenUtil.generateToken(user);
             AuthResponse authResponse = new AuthResponse(user.getEmail(), token);
+//            LOGGER.info("User {} has been authenticated", user.getEmail());
             return ResponseEntity.ok(authResponse);
         } catch (BadCredentialsException e) {
-
+//            LOGGER.error("Invalid credentials", e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header(
                     "Authenticate", "Invalid credentials"
             ).build();
-
         }
     }
 

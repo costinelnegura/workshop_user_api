@@ -19,7 +19,7 @@ public class UserController {
     /*
     Create a new user and save the user details.
      */
-    @PostMapping("/create")
+    @PostMapping()
     public ResponseEntity<?> createUser(@RequestBody UserEntity user){
         return userService.createUser(user);
     }
@@ -28,8 +28,13 @@ public class UserController {
     Get user details using the ID.
      */
     @GetMapping(value = "/{ID}")
-    public ResponseEntity<?> getUserDetails(@PathVariable String ID){
+    public ResponseEntity<?> getUserDetails(@PathVariable Long ID){
         return userService.getUserDetails(ID);
+    }
+
+    @GetMapping()
+    public ResponseEntity<?> getAllUsers(){
+        return userService.getAllUsers();
     }
 
     /*

@@ -59,9 +59,6 @@ eureka:
 #    prefer-ip-address: true
 #    hostname: "localhost"
 
-
-
-
 #logging:
 #  pattern:
 #    console: "%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-},%X{spanId:-}] ${LOG_LEVEL_PATTERN:-%5p} %m%n"

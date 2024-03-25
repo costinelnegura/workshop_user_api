@@ -36,6 +36,7 @@ public class JwtTokenUtil {
     This method generates a JWT token based on the provided user information.
      */
     public String generateToken(UserEntity user) {
+//        LOGGER.info("Generating JWT token for user: {}", user.getUsername());
         return Jwts.builder()
                 .issuer("workshop_ltd")
                 .subject(user.getId().toString())
@@ -63,6 +64,7 @@ public class JwtTokenUtil {
         extractedUserDetails.put("username", parseClaims(token).get("username"));
         extractedUserDetails.put("roles", parseClaims(token).get("roles"));
         extractedUserDetails.put("authorities", parseClaims(token).get("authorities"));
+//        LOGGER.info("Extracted user details from JWT token: {}", extractedUserDetails);
         return extractedUserDetails;
     }
 
@@ -70,6 +72,7 @@ public class JwtTokenUtil {
     This method parses the claims (payload) of a JWT token.
      */
     public Claims parseClaims(String token) {
+//        LOGGER.info("Parsing claims from JWT token");
         return Jwts
                 .parser()
                 .verifyWith(Keys.hmacShaKeyFor(secretKey.getBytes()))
@@ -92,6 +95,7 @@ public class JwtTokenUtil {
         if (token == null || token.isEmpty()) {
             response.put("status", HttpStatus.BAD_REQUEST.value());
             response.put("message", "Token is missing");
+//            LOGGER.error("Token is missing");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
         }
         try {
@@ -99,29 +103,30 @@ public class JwtTokenUtil {
             response.put("status", HttpStatus.OK.value());
             response.put("message", "Token is valid");
             response.put("data", claimsJws.getPayload());
+//            LOGGER.info("Token is valid: {}", claimsJws.getPayload());
             return ResponseEntity.ok(response);
         } catch (ExpiredJwtException e) {
-            LOGGER.error("Expired JWT token");
+//            LOGGER.error("Expired JWT token");
             response.put("status", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Expired JWT token");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (IllegalArgumentException e) {
-            LOGGER.error("Invalid JWT token");
+//            LOGGER.error("Invalid JWT token");
             response.put("status", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Invalid JWT token");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (MalformedJwtException e) {
-            LOGGER.error("Malformed JWT token");
+//            LOGGER.error("Malformed JWT token");
             response.put("status", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Malformed JWT token");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (SignatureException e) {
-            LOGGER.error("Invalid JWT signature");
+//            LOGGER.error("Invalid JWT signature");
             response.put("status", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Invalid JWT signature");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         } catch (UnsupportedJwtException e) {
-            LOGGER.error("Unsupported JWT token");
+//            LOGGER.error("Unsupported JWT token");
             response.put("status", HttpStatus.UNAUTHORIZED.value());
             response.put("message", "Unsupported JWT token");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
@@ -129,6 +134,7 @@ public class JwtTokenUtil {
     }
 
     public String getToken (String bearerToken) {
+//        LOGGER.info("Extracting token from bearer token: {}", bearerToken.substring(7));
         return bearerToken.substring(7);
     }
 
